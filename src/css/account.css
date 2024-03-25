@@ -1,0 +1,8 @@
+#domain-changer {
+    display: flex;
+    flex-direction: column;
+}
+
+#progress-file-container {
+    display: none;
+}
