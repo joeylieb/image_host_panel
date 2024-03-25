@@ -7,13 +7,13 @@ export const Login = () => {
     const auth = useAuth();
 
     useEffect(() => {
-        if(auth.key.length > 1){
+        if(auth.key){
             auth.loginAction({key: auth.key}).then((result) => {
                 if(result.d){
                     window.location.replace("/account");
                 }
             }).catch((e) => {
-                console.error("API IS OFF")
+                console.error("API IS OFF" + e)
             })
         }
     }, [auth])
