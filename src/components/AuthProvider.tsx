@@ -2,6 +2,7 @@ import {createContext, useContext, useState} from "react";
 import {IUser} from "../interfaces/IUser";
 import {useNavigate} from "react-router-dom";
 import {isAdminResponse, UserLoginResponse} from "../interfaces/IAPI";
+import config from "../config.json";
 
 interface AuthContextProps {
     key: string,
@@ -20,7 +21,7 @@ const AuthProvider = ({children}: any) => {
     const navigate = useNavigate();
     const loginAction = async (data: any) => {
         try {
-            const response = await fetch("http://localhost:5005/auth/login", {
+            const response = await fetch(config.apiEndpoint + "/auth/login", {
                method: "POST",
                headers: {
                    "Content-Type": "application/json"
@@ -43,7 +44,7 @@ const AuthProvider = ({children}: any) => {
 
     const fetchUser = async (): Promise<IUser | null> => {
         try {
-            const response = await fetch("http://localhost:5005/users/@me", {
+            const response = await fetch(config.apiEndpoint + "/users/@me", {
                 method: "GET",
                 headers: {
                     "Authorization": key,
@@ -75,7 +76,7 @@ const AuthProvider = ({children}: any) => {
 
     const isUserAdmin = async (): Promise<boolean> => {
         try {
-            const response = await fetch("http://localhost:5005/users/isAdmin", {
+            const response = await fetch(config.apiEndpoint + "/users/isAdmin", {
                 method: "GET",
                 headers: {
                     "Authorization": key,

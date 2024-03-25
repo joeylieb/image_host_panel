@@ -10,6 +10,7 @@ import "../css/account.css";
 import {toast, ToastContainer} from "react-toastify";
 import {Zoom} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
+import config from "../config.json";
 
 
 export const Account = () => {
@@ -24,7 +25,7 @@ export const Account = () => {
         (async () => {
             try {
                 const userData = await auth.fetchUser();
-                const result = await fetch("http://localhost:5005/domain/list/all");
+                const result = await fetch(config.apiEndpoint + "/domain/list/all");
                 const res = await result.json() as URLListResponse;
                 setURLS(res.d.map(e => ({label: e.url, value: e.id})))
                 setUser(userData);
@@ -41,7 +42,7 @@ export const Account = () => {
         console.log(!selectedURL)
         if (!selectedURL) return output.innerText = "You need to select a domain!";
 
-        const result = await fetch("http://localhost:5005/users/@me/domain/edit", {
+        const result = await fetch(config.apiEndpoint + "/users/@me/domain/edit", {
             method: "POST",
             headers: {
                 "Authorization": auth.key,
@@ -71,7 +72,7 @@ export const Account = () => {
         formData.append("file", fileInput.files[0]);
         const res = await axios({
             method: "POST",
-            url: "http://localhost:5005/upload/image",
+            url: config.apiEndpoint + "/upload/image",
             data: formData,
             headers: {
                 "Content-Type": "multipart/form-data",

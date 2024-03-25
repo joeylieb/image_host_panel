@@ -2,6 +2,8 @@ import {useAuth} from "../components/AuthProvider";
 import {FormEvent, useEffect, useState} from "react";
 import {ResultResponse} from "../interfaces/IAPI";
 
+import config from "../config.json";
+
 export const Admin = () => {
     const auth = useAuth();
     const [admin, setAdmin] = useState<boolean>(false);
@@ -27,7 +29,7 @@ export const Admin = () => {
 
         console.log(JSON.stringify(data))
 
-        const response = await fetch("http://localhost:5005/domain/create/new", {
+        const response = await fetch(config.apiEndpoint + "/domain/create/new", {
             method: "POST",
             headers: {
                 "Authorization": auth.key,
