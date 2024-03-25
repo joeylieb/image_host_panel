@@ -87,6 +87,7 @@ export const Account = () => {
             await navigator.clipboard.writeText(res.data.d.url)
             toast.success("Image link copied to clipboard!")
         } catch (e) {
+            console.error(e);
             toast.error("An error when copying to your clipboard!")
         }
 
