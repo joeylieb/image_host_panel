@@ -24,3 +24,15 @@ export interface URLListResponse {
         dateAdded: string,
         id: string}>
 }
+
+export interface UserUploadListResponse {
+    status: number,
+    d: Array<{
+        fileExtension: string
+        id: string
+        dateCreated: string
+        userUploaded: string
+        fileName: string
+        fileType: string
+    }>
+}

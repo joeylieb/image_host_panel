@@ -1,16 +1,19 @@
 import {useAuth} from "../components/AuthProvider";
-import {FormEvent, useEffect, useState} from "react";
+import React, {FormEvent, MouseEventHandler, useEffect, useState} from "react";
 import {IUser} from "../interfaces/IUser";
 import {Loading} from "../components/Loading";
 import Select from 'react-select';
-import {URLListResponse} from "../interfaces/IAPI";
+import {URLListResponse, UserUploadListResponse} from "../interfaces/IAPI";
 import axios from "axios";
-
+import Moment from "react-moment";
+import "moment-timezone";
 import "../css/account.css";
 import {toast, ToastContainer} from "react-toastify";
 import {Zoom} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import config from "../config.json";
+import {getUserRecentlyUploaded} from "../util/API";
+import {SelectedImage} from "../components/SelectedImage"
 
 
 export const Account = () => {
@@ -19,6 +22,10 @@ export const Account = () => {
     const [allURLs, setURLS] = useState<Array<{label: string, value: string}>>();
     const [isLoading, setLoading] = useState<boolean>(true);
     const [selectedURL, setSelectedURL] = useState<{value: string; label: string;} | null>(null);
+    const [recentlyUpload, setRecent] = useState<UserUploadListResponse | null>();
+    const [reload, setReload] = useState<boolean>(false);
+
+    const [selectedImage, setSelectedImage] = useState<{fileName: string; dateCreated: number; active: boolean}>();
 
 
     useEffect(() => {
@@ -27,15 +34,22 @@ export const Account = () => {
                 const userData = await auth.fetchUser();
                 const result = await fetch(config.apiEndpoint + "/domain/list/all");
                 const res = await result.json() as URLListResponse;
+
+                const imageData = await getUserRecentlyUploaded(userData, 10);
+
+                setRecent(imageData)
                 setURLS(res.d.map(e => ({label: e.url, value: e.id})))
                 setUser(userData);
-                setLoading(false)
+                setLoading(false);
+                setReload(false);
                 console.log(allURLs);
             } catch (e) {
                 console.error("Error fetching user data:", e)
             }
         })();
-    }, []);
+    }, [reload]);
+
+
 
     const onURLSubmit = async () => {
         const output = document.getElementById("account-page-output")!;
@@ -52,7 +66,7 @@ export const Account = () => {
         });
         const res = await result.json();
 
-        if(res.d) return window.location.reload();
+        if(res.d) return setReload(true);
 
         return output.innerText = "An error has occurred!";
     }
@@ -93,6 +107,31 @@ export const Account = () => {
 
         progressContainer.style.display = "none";
         fileInput.value = "";
+
+        setReload(true);
+    }
+
+    const onImageClick = (imageData: { fileName: string; dateCreated: number; e: React.MouseEvent<HTMLImageElement> }) => {
+        if(selectedImage?.active) return;
+
+        setSelectedImage({fileName: imageData.fileName, dateCreated: imageData.dateCreated, active: true});
+    }
+
+    const onSelectedImageClose = () => {
+
+        setSelectedImage({fileName: "", dateCreated: 0, active: false})
+    }
+
+    const onSelectedImageCopy = () => {
+
+        navigator.clipboard.writeText(config.apiEndpoint + "/" + selectedImage!.fileName).then(() => {
+            toast.success("Image link copied to clipboard!")
+        }).catch((e) => {
+            toast.error("There was an error copying to clipboard!")
+            console.error(e);
+        })
+
+
     }
 
 
@@ -119,6 +158,27 @@ export const Account = () => {
                     <button onClick={onURLSubmit}>Change URL</button>
                 </div>
                 <p id="account-page-output"></p>
+                <div id="recent-uploads-user">
+                    {recentlyUpload && recentlyUpload.d.map(data => (
+                        <div key={data.id} className="image-account-page">
+                            <img
+                                src={config.apiEndpoint + "/" + data.fileName} alt={data.userUploaded}
+                                onClick={(e) => onImageClick(({fileName: data.fileName, dateCreated: parseInt(data.dateCreated), e}))}
+                            />
+                        </div>
+                    ))}
+                </div>
+
+                {selectedImage && (
+                    <SelectedImage
+                        active={selectedImage.active}
+                        fileName={selectedImage.fileName}
+                        dateCreated={selectedImage.dateCreated}
+                        onClose={onSelectedImageClose}
+                        onCopy={onSelectedImageCopy}
+                    />
+                )}
+
                 <ToastContainer
                     position="bottom-right"
                     autoClose={8000}
