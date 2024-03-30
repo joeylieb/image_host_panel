@@ -124,7 +124,7 @@ export const Account = () => {
 
     const onSelectedImageCopy = () => {
 
-        navigator.clipboard.writeText(config.apiEndpoint + "/" + selectedImage!.fileName).then(() => {
+        navigator.clipboard.writeText(user?.selectedDomain + "/" + selectedImage!.fileName).then(() => {
             toast.success("Image link copied to clipboard!")
         }).catch((e) => {
             toast.error("There was an error copying to clipboard!")
