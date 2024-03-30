@@ -1,11 +1,10 @@
 import {useAuth} from "../components/AuthProvider";
-import React, {FormEvent, MouseEventHandler, useEffect, useState} from "react";
+import React, {FormEvent, useEffect, useState} from "react";
 import {IUser} from "../interfaces/IUser";
 import {Loading} from "../components/Loading";
 import Select from 'react-select';
 import {URLListResponse, UserUploadListResponse} from "../interfaces/IAPI";
 import axios from "axios";
-import Moment from "react-moment";
 import "moment-timezone";
 import "../css/account.css";
 import {toast, ToastContainer} from "react-toastify";
