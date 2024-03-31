@@ -93,3 +93,31 @@
 #image-data-actions > :last-child {
     margin-left: auto; /* Move the last flex child to the far right */
 }
+
+#display-selected-image {
+    max-width: 300px;
+    max-height: 300px;
+}
+
+#account-page-utils {
+    display: flex;
+    gap: 3%
+}
+
+#account-page {
+    margin-left: 10px;
+    position: relative;
+}
+
+#sign-out-account {
+    position: absolute;
+    top: 0;
+    right: 0;
+    margin-right: 20px;
+}
+
+.account-util {
+    border: #282c34 solid 1px;
+    padding: 30px;
+    border-radius: 20px;
+}

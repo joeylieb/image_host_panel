@@ -1,5 +1,5 @@
 import {useAuth} from "../components/AuthProvider";
-import React, {FormEvent, useEffect, useState} from "react";
+import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import {IUser} from "../interfaces/IUser";
 import {Loading} from "../components/Loading";
 import Select from 'react-select';
@@ -39,9 +39,9 @@ export const Account = () => {
                 setRecent(imageData)
                 setURLS(res.d.map(e => ({label: e.url, value: e.id})))
                 setUser(userData);
-                setLoading(false);
                 setReload(false);
                 console.log(allURLs);
+                setLoading(false)
             } catch (e) {
                 console.error("Error fetching user data:", e)
             }
@@ -52,7 +52,6 @@ export const Account = () => {
 
     const onURLSubmit = async () => {
         const output = document.getElementById("account-page-output")!;
-        console.log(!selectedURL)
         if (!selectedURL) return output.innerText = "You need to select a domain!";
 
         const result = await fetch(config.apiEndpoint + "/users/@me/domain/edit", {
@@ -76,10 +75,15 @@ export const Account = () => {
         const output = document.getElementById("account-page-output")!;
         const progressContainer = document.getElementById("progress-file-container")!;
         const progressBar = progressContainer.children.item(1) as HTMLProgressElement;
+        const imageDisplay = document.getElementById("display-selected-image") as HTMLImageElement;
 
         progressContainer.style.display = "block";
 
         if (!fileInput.files) return output.innerText = "You need to select a file."
+
+        console.log(URL.createObjectURL(fileInput.files[0]))
+
+
 
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
@@ -95,6 +99,8 @@ export const Account = () => {
                 progressBar!.value = (progressEvent.loaded / progressEvent.total! * 100 | 0)
             }
         });
+
+        imageDisplay.src = "";
 
         try {
             await navigator.clipboard.writeText(res.data.d.url)
@@ -133,6 +139,17 @@ export const Account = () => {
 
     }
 
+    const onFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+        if(!e.currentTarget.files) return;
+
+        const imageDisplay = document.getElementById("display-selected-image") as HTMLImageElement;
+        imageDisplay.src = URL.createObjectURL(e.currentTarget.files[0]);
+    }
+
+    const onSignOut = () => {
+        auth.logOut();
+    }
+
 
 
     if(user && !isLoading){
@@ -140,22 +157,31 @@ export const Account = () => {
             <div id="account-page">
                 <h1>Welcome {user.username}</h1>
                 <p>You have {user.uploads} uploads</p>
-                <div id="file-upload">
-                    <p>Upload custom file to host</p>
-                    <form onSubmit={onFileSubmit}>
-                        <input type="file" id="fileUpload" name="filename"/>
-                        <input type="submit"/>
-                    </form>
-                    <div id="progress-file-container">
-                        <label htmlFor="file-progress">Progress: </label>
-                        <progress id="file-progress" max="100"></progress>
+
+                <div id="account-page-utils">
+                    <div id="file-upload" className="account-util">
+                        <p>Upload custom file to host</p>
+                        <form onSubmit={onFileSubmit}>
+                            <input type="file" id="fileUpload" name="filename" onChange={onFileChange}/>
+                            <input type="submit"/>
+                        </form>
+                        <div id="progress-file-container">
+                            <label htmlFor="file-progress">Progress: </label>
+                            <progress id="file-progress" max="100"></progress>
+                        </div>
+                        <img id="display-selected-image"  alt="Your chosen file if image"/>
+                    </div>
+                    <div style={{width: "300px"}} id="domain-changer" className="account-util">
+                        <p>{user.selectedDomain ? `Currently selected domain: ${user.selectedDomain}` : ``}</p>
+                        <Select options={allURLs} onChange={setSelectedURL} />
+                        <button onClick={onURLSubmit}>Change URL</button>
+                    </div>
+                    <div className="account-util">
+
                     </div>
                 </div>
-                <div style={{width: "300px"}} id="domain-changer">
-                    <p>{user.selectedDomain ? `Currently selected domain: ${user.selectedDomain}` : ``}</p>
-                    <Select options={allURLs} onChange={setSelectedURL} />
-                    <button onClick={onURLSubmit}>Change URL</button>
-                </div>
+
+                <button onClick={onSignOut} id="sign-out-account">Sign Out</button>
                 <p id="account-page-output"></p>
                 <div id="recent-uploads-user">
                     {recentlyUpload && recentlyUpload.d.map(data => (
