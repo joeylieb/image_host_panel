@@ -3,7 +3,7 @@ import {ChangeEvent, FormEvent, useEffect, useState} from "react";
 import {IUser} from "../interfaces/IUser";
 import {Loading} from "../components/Loading";
 import Select from 'react-select';
-import {URLListResponse, UserUploadListResponse} from "../interfaces/IAPI";
+import {UserUploadListResponse} from "../interfaces/IAPI";
 import axios from "axios";
 import "moment-timezone";
 import "../css/account.css";
@@ -11,9 +11,10 @@ import {toast, ToastContainer} from "react-toastify";
 import {Zoom} from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import config from "../config.json";
-import {getUserRecentlyUploaded} from "../util/API";
+import {getAllDomains, getShareXConfig, getUserRecentlyUploaded} from "../util/API";
 import {SelectedImage} from "../components/SelectedImage"
-
+import NavBar from "../components/NavBar";
+import {downloadFile} from "../util/File";
 
 export const Account = () => {
     const auth = useAuth();
@@ -31,16 +32,14 @@ export const Account = () => {
         (async () => {
             try {
                 const userData = await auth.fetchUser();
-                const result = await fetch(config.apiEndpoint + "/domain/list/all");
-                const res = await result.json() as URLListResponse;
-
+                const domains = await getAllDomains();
                 const imageData = await getUserRecentlyUploaded(userData, 10);
 
+                domains ? setURLS(domains.d.map(e => ({label: e.url, value: e.id}))) : toast.info("Could not receive domains");
+
                 setRecent(imageData)
-                setURLS(res.d.map(e => ({label: e.url, value: e.id})))
                 setUser(userData);
                 setReload(false);
-                console.log(allURLs);
                 setLoading(false)
             } catch (e) {
                 console.error("Error fetching user data:", e)
@@ -51,8 +50,7 @@ export const Account = () => {
 
 
     const onURLSubmit = async () => {
-        const output = document.getElementById("account-page-output")!;
-        if (!selectedURL) return output.innerText = "You need to select a domain!";
+        if (!selectedURL) return toast.error("You need to select a URL!")
 
         const result = await fetch(config.apiEndpoint + "/users/@me/domain/edit", {
             method: "POST",
@@ -66,24 +64,20 @@ export const Account = () => {
 
         if(res.d) return setReload(true);
 
-        return output.innerText = "An error has occurred!";
+        return toast.error("An error has occurred!");
     }
 
     const onFileSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+
         const fileInput = e.currentTarget.children.item(0) as HTMLInputElement;
-        const output = document.getElementById("account-page-output")!;
         const progressContainer = document.getElementById("progress-file-container")!;
         const progressBar = progressContainer.children.item(1) as HTMLProgressElement;
         const imageDisplay = document.getElementById("display-selected-image") as HTMLImageElement;
 
+        if (!fileInput.files) return toast.info("You need to select a file");
+
         progressContainer.style.display = "block";
-
-        if (!fileInput.files) return output.innerText = "You need to select a file."
-
-        console.log(URL.createObjectURL(fileInput.files[0]))
-
-
 
         const formData = new FormData();
         formData.append("file", fileInput.files[0]);
@@ -101,6 +95,7 @@ export const Account = () => {
         });
 
         imageDisplay.src = "";
+        document.getElementById("display-selected-image")!.style.display = "none";
 
         try {
             await navigator.clipboard.writeText(res.data.d.url)
@@ -144,10 +139,20 @@ export const Account = () => {
 
         const imageDisplay = document.getElementById("display-selected-image") as HTMLImageElement;
         imageDisplay.src = URL.createObjectURL(e.currentTarget.files[0]);
+        imageDisplay.style.display = "block";
     }
 
     const onSignOut = () => {
         auth.logOut();
+    }
+
+    const onConfigGen = async () => {
+        const config = await getShareXConfig(user);
+
+        if(!config) return toast.error("Error generating config");
+
+        const jsonString = JSON.stringify(config.d, null, 2);
+        downloadFile(jsonString, `${user?.username}-config.sxcu`);
     }
 
 
@@ -155,8 +160,18 @@ export const Account = () => {
     if(user && !isLoading){
         return(
             <div id="account-page">
+
+                <NavBar links={[
+                    {name: "Home", path: "/"},
+                    {name: "Images", path: "/account/images"},
+                    {name: "Settings", path: "/account/settings"},
+                    {name: "Sign Out", path: "/account/signout"},
+                ]}/>
+
                 <h1>Welcome {user.username}</h1>
                 <p>You have {user.uploads} uploads</p>
+                <p>{user.selectedDomain ? `Currently selected domain: ${user.selectedDomain}` : ``}</p>
+                <button onClick={onConfigGen}>Generate ShareX Config</button>
 
                 <div id="account-page-utils">
                     <div id="file-upload" className="account-util">
@@ -169,30 +184,30 @@ export const Account = () => {
                             <label htmlFor="file-progress">Progress: </label>
                             <progress id="file-progress" max="100"></progress>
                         </div>
-                        <img id="display-selected-image"  alt="Your chosen file if image"/>
+                        <img id="display-selected-image"  alt="Your chosen file"/>
                     </div>
                     <div style={{width: "300px"}} id="domain-changer" className="account-util">
-                        <p>{user.selectedDomain ? `Currently selected domain: ${user.selectedDomain}` : ``}</p>
+                        <p>Change URL:</p>
                         <Select options={allURLs} onChange={setSelectedURL} />
                         <button onClick={onURLSubmit}>Change URL</button>
                     </div>
                     <div className="account-util">
+                        <p>Most recently uploaded pictures</p>
+                        <div id="recent-uploads-user">
+                            {recentlyUpload && recentlyUpload.d.map(data => (
+                                <div key={data.id} className="image-account-page">
+                                    <img
+                                        src={config.apiEndpoint + "/" + data.fileName} alt={data.userUploaded}
+                                        onClick={(e) => onImageClick(({fileName: data.fileName, dateCreated: parseInt(data.dateCreated), e}))}
+                                    />
+                                </div>
+                            ))}
+                        </div>
 
                     </div>
                 </div>
 
                 <button onClick={onSignOut} id="sign-out-account">Sign Out</button>
-                <p id="account-page-output"></p>
-                <div id="recent-uploads-user">
-                    {recentlyUpload && recentlyUpload.d.map(data => (
-                        <div key={data.id} className="image-account-page">
-                            <img
-                                src={config.apiEndpoint + "/" + data.fileName} alt={data.userUploaded}
-                                onClick={(e) => onImageClick(({fileName: data.fileName, dateCreated: parseInt(data.dateCreated), e}))}
-                            />
-                        </div>
-                    ))}
-                </div>
 
                 {selectedImage && (
                     <SelectedImage

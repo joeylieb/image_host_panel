@@ -36,3 +36,20 @@ export interface UserUploadListResponse {
         fileType: string
     }>
 }
+
+export interface ShareXConfigResponse {
+    status: number,
+    d: {
+        Version: string;
+        Name: string;
+        DestinationType: string;
+        RequestMethod: string;
+        RequestURL: string;
+        Headers: {
+            Authorization: string;
+        };
+        Body: string;
+        FileFormName: string;
+        URL: string;
+    }
+}

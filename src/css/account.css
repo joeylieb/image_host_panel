@@ -30,12 +30,12 @@
 }
 
 #recent-uploads-user {
-    margin-top: 10%;
     display: flex;
-    width: 50%;
     flex-wrap: wrap;
     gap: 10px;
     padding: 20px;
+    justify-content: center; /* Centers items along the main axis */
+    align-items: center;
 }
 
 #selected-image-user {
@@ -101,11 +101,12 @@
 
 #account-page-utils {
     display: flex;
-    gap: 3%
+    gap: 1%
 }
 
 #account-page {
-    margin-left: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
     position: relative;
 }
 
@@ -114,10 +115,26 @@
     top: 0;
     right: 0;
     margin-right: 20px;
+    margin-top: 10px;
 }
 
 .account-util {
     border: #282c34 solid 1px;
-    padding: 30px;
+    padding: 10px;
     border-radius: 20px;
+}
+
+#display-selected-image{
+    display: none;
+}
+
+@media screen and (max-width: 768px){
+    #account-page-utils {
+        flex-direction: column;
+        gap: 10px;
+    }
+}
+
+.image-modal {
+    width: 80vw;
 }

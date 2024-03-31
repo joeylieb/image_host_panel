@@ -1,0 +1,38 @@
+#navbar-link-container {
+    display: flex;
+    justify-content: left;
+    gap: 20px;
+    list-style-type: none;
+    font-size: larger;
+}
+
+.navbar-item hr {
+    opacity: 1;
+    transition: opacity 0.2s ease-out;
+}
+
+.navbar-item:hover > hr {
+    opacity: 0.2;
+}
+
+.navbar-item:hover {
+    cursor: pointer;
+}
+
+#navbar-main {
+    width: 100%;
+    height: 10%;
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.horizontal-nav-line {
+    height: 1px;
+    background-color: #282c34;
+}
+
+.navbar-link {
+    text-decoration: none;
+    color: black;
+}
