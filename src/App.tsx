@@ -7,6 +7,7 @@ import {Login} from "./pages/Login";
 import PrivateRoute from "./components/PrivateRoute";
 import {Account} from "./pages/Account";
 import {Admin} from "./pages/Admin";
+import {Images} from "./pages/Images";
 
 function App() {
   return (
@@ -20,6 +21,9 @@ function App() {
             </Route>
             <Route element={<PrivateRoute/>}>
                 <Route path="/admin" element={<Admin/>}/>
+            </Route>
+            <Route element={<PrivateRoute/>}>
+                <Route path="/account/images" element={<Images/>}/>
             </Route>
         </Routes>
       </AuthProvider>

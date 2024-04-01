@@ -1,20 +1,22 @@
 import {IUser} from "../interfaces/IUser";
-import {ShareXConfigResponse, URLListResponse, UserUploadListResponse} from "../interfaces/IAPI"
+import {ResultResponse, ShareXConfigResponse, URLListResponse, UserUploadListResponse} from "../interfaces/IAPI"
 import config from "../config.json";
 
-export const getUserRecentlyUploaded = async (user: IUser | null, amount: number): Promise<UserUploadListResponse | null> => {
+export const getUserRecentlyUploaded = async (user: IUser | null, amount: number, from?: string): Promise<UserUploadListResponse | null> => {
     if (!user) {
         return null;
     }
 
-    const result = await fetch(config.apiEndpoint + "/users/@me/uploads/get/" + amount, {
+    const result = await fetch(config.apiEndpoint + "/users/@me/uploads/get/" + amount + `${from ? "?from=" + from : ""}`, {
         headers: {
             "Authorization": user.apiKey
         }
     });
     const res = await result.json() as UserUploadListResponse;
 
+
     if (res.d) {
+        console.log("valid image data")
         return res;
     }
 
@@ -33,15 +35,29 @@ export const getAllDomains = async (): Promise<URLListResponse | null> => {
 }
 
 export const getShareXConfig = async (user: IUser | null): Promise<ShareXConfigResponse | null> => {
-    if (!user) {
-        console.log("No user")
-        return null;
-    }
+    if (!user) return null;
 
     const result = await fetch(config.apiEndpoint + "/users/@me/generate/sharex", {
         headers: {
             "Authorization": user.apiKey
         }
+    });
+    const res = await result.json();
+
+    if(res.d){
+        return res;
+    }
+
+    return null;
+}
+
+export const deleteImage = async (user: IUser | null, fileName: string): Promise<ResultResponse | null> => {
+    if (!user) return null;
+    const result = await fetch(config.apiEndpoint + "/" + fileName + "/delete", {
+        headers: {
+            "Authorization": user.apiKey
+        },
+        method: "DELETE"
     });
     const res = await result.json();
 
