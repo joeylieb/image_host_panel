@@ -1,9 +1,9 @@
-import express from "express";
-import path from "path";
-import morgan from "morgan";
+const path = require("path");
+const morgan = require("morgan");
+const express = require("express");
 const app = express();
 
-app.use(morgan(":method :url :status :response-time ms - :res[content-length]"));
+app.use(morgan("tiny"));
 
 app.use(express.static(path.join(__dirname, "build")))
 
