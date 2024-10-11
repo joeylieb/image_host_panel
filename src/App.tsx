@@ -8,6 +8,7 @@ import PrivateRoute from "./components/PrivateRoute";
 import {Account} from "./pages/Account";
 import {Admin} from "./pages/Admin";
 import {Images} from "./pages/Images";
+import {Image} from "./pages/Image";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
         <Routes>
             <Route path="/" element={<Home/>}/>
             <Route path="/login" element={<Login/>}/>
+            <Route path="/image/:imageID" element={<Image/>}/>
             <Route element={<PrivateRoute/>}>
                 <Route path="/account" element={<Account/>}/>
             </Route>

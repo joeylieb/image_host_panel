@@ -6,6 +6,19 @@ export interface UserLoginResponse {
     error?: string
 }
 
+export interface imageDataResponse {
+    status: number,
+    d: {
+        embedData: {
+            title: string,
+            description: string,
+            color: string
+        },
+        user: string,
+        timeCreated: string
+    }
+}
+
 export interface isAdminResponse {
     status: number,
     d: boolean

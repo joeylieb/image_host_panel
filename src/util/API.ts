@@ -1,5 +1,11 @@
 import {IUser} from "../interfaces/IUser";
-import {ResultResponse, ShareXConfigResponse, URLListResponse, UserUploadListResponse} from "../interfaces/IAPI"
+import {
+    imageDataResponse,
+    ResultResponse,
+    ShareXConfigResponse,
+    URLListResponse,
+    UserUploadListResponse
+} from "../interfaces/IAPI"
 import config from "../config.json";
 
 export const getUserRecentlyUploaded = async (user: IUser | null, amount: number, from?: string): Promise<UserUploadListResponse | null> => {
@@ -60,6 +66,17 @@ export const deleteImage = async (user: IUser | null, fileName: string): Promise
         method: "DELETE"
     });
     const res = await result.json();
+
+    if(res.d){
+        return res;
+    }
+
+    return null;
+}
+
+export const getImageData = async(imageID: string): Promise<imageDataResponse | null> => {
+    const result = await fetch(config.apiEndpoint + "/upload/image/data?fileName=" + imageID);
+    const res = await result.json() as imageDataResponse;
 
     if(res.d){
         return res;
