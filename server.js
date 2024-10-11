@@ -5,7 +5,12 @@ const app = express();
 
 app.use(morgan("tiny"));
 app.use(require('prerender-node').set('prerenderToken', 'EPH7xmEFqEgXazQV3Djz'));
-app.use(express.static(path.join(__dirname, "build")))
+app.use(express.static(path.join(__dirname, "build")));
+
+app.use(express.static(path.join(__dirname, "build"), {
+    maxAge: '1y',
+    etag: false
+}));
 
 app.get("/*", (req, res) => {
     res.sendFile(path.join(__dirname, "build", "index.html"));
