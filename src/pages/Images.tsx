@@ -10,12 +10,15 @@ import Moment from "react-moment";
 import 'react-toastify/dist/ReactToastify.css';
 
 import "../css/images.css";
+import "../css/account.css";
+import NavBar from "../components/NavBar";
 
 export const Images = () => {
     const auth = useAuth();
     const [user, setUser] = useState<IUser | null>(null);
     const [initialImages, setInitial] = useState<UserUploadListResponse | null>(null);
     const [isLoading, setLoading] = useState<boolean>(true);
+
 
     useEffect(() => {
         (async () => {
@@ -71,6 +74,11 @@ export const Images = () => {
         return toast.error("An error occurred");
     }
 
+    const onImageOpen = (fileName: string) => {
+        window.open(config.apiEndpoint + "/" + fileName)
+    }
+
+
     if(isLoading){
         return (
             <Loading/>
@@ -79,6 +87,12 @@ export const Images = () => {
 
     return (
         <div id="images-page">
+            <NavBar links={[
+                {name: "Home", path: "/"},
+                {name: "Account", path: "/account"},
+                {name: "Settings", path: "/account/settings"},
+                {name: "Sign Out", path: "/account/signout"},
+            ]}/>
             <h1>Your images</h1>
             <div id="image-table" onScroll={onTableScroll}>
                 <table>
@@ -93,19 +107,23 @@ export const Images = () => {
                     {initialImages && initialImages.d.map(data => (
                         <tr key={data.id}>
                             <td className="image-row">
-                                <img src={config.apiEndpoint + "/" + data.fileName} loading="lazy" alt={data.id}/>
+                                <img className="image-row-data" src={config.apiEndpoint + "/" + data.fileName} loading="lazy" alt={data.id}/>
                             </td>
                             <td className="image-row">
-                                <Moment unix format="MMMM Do 'YY">{data.dateCreated}</Moment>
+                                <Moment unix format="MMMM Do YYYY">{data.dateCreated}</Moment>
                             </td>
                             <td className="image-row">
-                                <button onClick={() => {onDeleteClick(data.fileName)}}>Delete</button>
+                                <button onClick={async () => {
+                                    await onDeleteClick(data.fileName)
+                                }}>Delete</button>
+                                <button onClick={() => onImageOpen(data.fileName)}>Open</button>
                             </td>
                         </tr>
                     ))}
                     </tbody>
                 </table>
             </div>
+
             <ToastContainer
                 position="bottom-right"
                 autoClose={8000}
